@@ -7,9 +7,17 @@ import (
 	"github.com/fatih/color"
 )
 
-var (
-	prefixColor = color.New(color.FgHiWhite, color.Bold)
-)
+var prefixColors = []*color.Color{
+	color.New(color.FgRed, color.Bold),
+	color.New(color.FgGreen, color.Bold),
+	color.New(color.FgYellow, color.Bold),
+	color.New(color.FgBlue, color.Bold),
+	color.New(color.FgMagenta, color.Bold),
+	color.New(color.FgCyan, color.Bold),
+	color.New(color.FgWhite, color.Bold),
+}
+
+var prefixMap = make(map[string]int)
 
 type Writer interface {
 	Print(event Event) error
@@ -30,6 +38,15 @@ func (w *writer) Print(ev Event) error {
 
 func (w *writer) Fprint(out io.Writer, ev Event) error {
 	prefix := w.prefix(ev)
+
+	var prefixColor *color.Color
+	if val, ok := prefixMap[prefix]; ok {
+		prefixColor = prefixColors[val]
+	} else {
+		val = (len(prefixMap) + 1) % len(prefixColors)
+		prefixMap[prefix] = val
+		prefixColor = prefixColors[val]
+	}
 
 	if _, err := prefixColor.Fprint(out, prefix); err != nil {
 		return err
