@@ -1,9 +1,11 @@
 package kail
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
+	"github.com/TylerBrock/colorjson"
 	"github.com/fatih/color"
 )
 
@@ -15,6 +17,18 @@ var prefixColors = []*color.Color{
 	color.New(color.FgMagenta, color.Bold),
 	color.New(color.FgCyan, color.Bold),
 	color.New(color.FgWhite, color.Bold),
+}
+
+var formatter = &colorjson.Formatter{
+	KeyColor:        color.New(color.FgWhite, color.Italic),
+	StringColor:     color.New(color.FgHiWhite),
+	BoolColor:       color.New(color.FgHiGreen),
+	NumberColor:     color.New(color.FgHiCyan),
+	NullColor:       color.New(color.FgHiMagenta),
+	StringMaxLength: 0,
+	DisabledColor:   false,
+	Indent:          0,
+	RawStrings:      false,
 }
 
 var prefixMap = make(map[string]int)
@@ -57,8 +71,16 @@ func (w *writer) Fprint(out io.Writer, ev Event) error {
 
 	log := ev.Log()
 
-	if _, err := out.Write(log); err != nil {
-		return err
+	var obj map[string]interface{}
+	if err := json.Unmarshal([]byte(log), &obj); err != nil {
+		if _, err := out.Write(log); err != nil {
+			return err
+		}
+	} else {
+		s, _ := formatter.Marshal(obj)
+		if _, err := out.Write(s); err != nil {
+			return err
+		}
 	}
 
 	if sz := len(log); sz == 0 || log[sz-1] != byte('\n') {
