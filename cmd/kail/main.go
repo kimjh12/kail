@@ -69,6 +69,8 @@ var (
 			PlaceHolder("DURATION").
 			Default("1s").
 			Duration()
+
+	flagIndent = kingpin.Flag("indent", "Format indent of json logs.").Short('i').Default("0").Int()
 )
 
 var (
@@ -311,7 +313,7 @@ func createController(
 
 func streamLogs(controller kail.Controller) {
 
-	writer := kail.NewWriter(os.Stdout)
+	writer := kail.NewWriter(os.Stdout, *flagIndent)
 
 	for {
 		select {

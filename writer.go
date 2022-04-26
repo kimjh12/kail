@@ -16,7 +16,6 @@ var prefixColors = []*color.Color{
 	color.New(color.FgBlue, color.Bold),
 	color.New(color.FgMagenta, color.Bold),
 	color.New(color.FgCyan, color.Bold),
-	color.New(color.FgWhite, color.Bold),
 }
 
 var formatter = &colorjson.Formatter{
@@ -38,7 +37,8 @@ type Writer interface {
 	Fprint(w io.Writer, event Event) error
 }
 
-func NewWriter(out io.Writer) Writer {
+func NewWriter(out io.Writer, indent int) Writer {
+	formatter.Indent = indent
 	return &writer{out}
 }
 
