@@ -10,16 +10,16 @@ import (
 )
 
 var prefixColors = []*color.Color{
-	color.New(color.FgRed, color.Bold),
-	color.New(color.FgGreen, color.Bold),
-	color.New(color.FgYellow, color.Bold),
-	color.New(color.FgBlue, color.Bold),
-	color.New(color.FgMagenta, color.Bold),
-	color.New(color.FgCyan, color.Bold),
+	color.New(color.FgHiRed),
+	color.New(color.FgHiGreen),
+	color.New(color.FgHiYellow),
+	color.New(color.FgHiBlue),
+	color.New(color.FgHiMagenta),
+	color.New(color.FgHiCyan),
 }
 
 var formatter = &colorjson.Formatter{
-	KeyColor:        color.New(color.FgWhite, color.Italic),
+	KeyColor:        color.New(color.FgWhite, color.Faint),
 	StringColor:     color.New(color.FgHiWhite),
 	BoolColor:       color.New(color.FgHiGreen),
 	NumberColor:     color.New(color.FgHiCyan),
@@ -30,7 +30,9 @@ var formatter = &colorjson.Formatter{
 	RawStrings:      false,
 }
 
-var prefixMap = make(map[string]int)
+const prefixMapMaxSize = 50
+
+var prefixMap = make(map[string]int, prefixMapMaxSize)
 
 type Writer interface {
 	Print(event Event) error
@@ -57,7 +59,10 @@ func (w *writer) Fprint(out io.Writer, ev Event) error {
 	if val, ok := prefixMap[prefix]; ok {
 		prefixColor = prefixColors[val]
 	} else {
-		val = (len(prefixMap) + 1) % len(prefixColors)
+		if len(prefixMap) >= prefixMapMaxSize {
+			prefixMap = make(map[string]int, prefixMapMaxSize)
+		}
+		val = len(prefixMap) % len(prefixColors)
 		prefixMap[prefix] = val
 		prefixColor = prefixColors[val]
 	}
